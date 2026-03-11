@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ME - Моніторинг двигунів</title>
+
+    <!-- Font Awesome для іконок -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Наш CSS -->
+    <link rel="stylesheet" href="/static/css/style.css" />
+  </head>
+  <body>
+    <!-- Навігація -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <div class="nav-logo">
+          <i class="fas fa-bolt"></i>
+          <span>ME</span>
+        </div>
+        <div class="nav-menu">
+          <button class="nav-btn active" data-view="dashboard">
+            <span>Двигуни</span>
+          </button>
+          <button class="nav-btn" data-view="add-motor">
+            <i class="fas fa-plus-circle"></i>
+            <span>Додати двигун</span>
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Основний контент -->
+    <main class="main-content">
+      <!-- Сторінка додавання мотора -->
+      <section id="add-motor-view" class="view">
+        <div class="page-header">
+          <h1><i class="fas fa-plus-circle"></i> Додати новий мотор</h1>
+          <p>Заповніть форму для реєстрації нового електродвигуна</p>
+        </div>
+
+        <div class="form-container">
+          <form id="addMotorForm" class="motor-form">
+            <div class="form-group">
+              <label for="motorName">
+                <i class="fas fa-tag"></i>
+                Назва мотора
+              </label>
+              <input
+                type="text"
+                id="motorName"
+                name="motorName"
+                required
+                placeholder="Введіть назву двигуна"
+              />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="ipTesys">
+                  <i class="fas fa-network-wired"></i>
+                  IP Tesys
+                </label>
+                <input
+                  type="text"
+                  id="ipTesys"
+                  name="ipTesys"
+                  required
+                  placeholder="192.168.1.100"
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="ipPlc">
+                  <i class="fas fa-microchip"></i>
+                  IP PLC
+                </label>
+                <input
+                  type="text"
+                  id="ipPlc"
+                  name="ipPlc"
+                  required
+                  placeholder="192.168.1.200"
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="motorLocation">
+                <i class="fas fa-map-marker-alt"></i>
+                Розташування
+              </label>
+              <input
+                type="text"
+                id="motorLocation"
+                name="motorLocation"
+                required
+                placeholder="Цех, лінія, позиція"
+              />
+            </div>
+
+            <div class="form-actions">
+              <button type="reset" class="btn-secondary">
+                <i class="fas fa-undo"></i>
+                Очистити
+              </button>
+              <button type="submit" class="btn-primary">
+                <i class="fas fa-save"></i>
+                Додати мотор
+              </button>
+            </div>
+          </form>
+          <div id="formMessage" class="form-message"></div>
+        </div>
+      </section>
+
+      <!-- Сторінка панелі з двигунами -->
+      <section id="dashboard-view" class="view active">
+        <div class="page-header">
+          <h2>Список двигунів</h2>
+        </div>
+
+        <div class="motors-grid" id="motorsGrid">
+          <!-- Мотори будуть додані через JavaScript -->
+        </div>
+      </section>
+    </main>
+
+    <!-- Модальне вікно підтвердження -->
+    <div id="deleteModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <i class="fas fa-exclamation-triangle"></i>
+          <h2>Підтвердження видалення</h2>
+        </div>
+        <div class="modal-body">
+          <p>
+            Ви впевнені, що хочете видалити двигун
+            <span id="deleteMotorName"></span>?
+          </p>
+          <p class="modal-warning">Цю дію неможливо скасувати!</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" onclick="closeModal()">
+            <i class="fas fa-times"></i>
+            Скасувати
+          </button>
+          <button class="btn-danger" id="confirmDelete">
+            <i class="fas fa-trash"></i>
+            Видалити
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Повідомлення -->
+    <div id="toast" class="toast"></div>
+
+    <!-- JavaScript -->
+    <script src="/static/js/app.js"></script>
+  </body>
+</html>

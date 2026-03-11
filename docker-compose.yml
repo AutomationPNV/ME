@@ -1,0 +1,96 @@
+services:
+  api:
+    build: ./back
+    volumes:
+      - ./back/app:/app # Монтуємо саме вміст папки з кодом
+    environment:
+      - PYTHONPATH=/app # ЦЕ ВИРІШИТЬ ПРОБЛЕМУ З DATABASE
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  frontend:
+    build: ./front
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  db:
+    image: postgres:16
+    container_name: postgres_motor
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
+      POSTGRES_DB: ${POSTGRES_DB:-motors}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  # ДОДАЄМО TDENGINE
+  tdengine:
+    image: tdengine/tdengine:latest
+    container_name: tdengine
+    hostname: tdengine
+    restart: unless-stopped
+    environment:
+      TAOS_FQDN: tdengine
+      TAOS_SERVER_PORT: 6030
+    ports:
+      - "6030:6030" # TCP порт для клієнтів
+      - "6041:6041" # REST API порт для Grafana
+      - "6043:6043" # WebSocket порт
+      - "6044:6044" # WebSocket порт для taosAdapter
+      - "6060:6060" # Web UI порт (опціонально)
+    volumes:
+      - tdengine_data:/var/lib/taos
+      - tdengine_log:/var/log/taos
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "taos", "-s", "show databases"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # ОНОВЛЮЄМО GRAFANA - додаємо плагін TDengine
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana-provisioning:/etc/grafana/provisioning # для автоматичної конфігурації
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_INSTALL_PLUGINS=tdengine-datasource # автоматичне встановлення плагіна
+      - GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=tdengine-datasource
+    depends_on:
+      - db
+      - tdengine
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  grafana_data:
+  tdengine_data:
+  tdengine_log:
